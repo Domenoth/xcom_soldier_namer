@@ -8,32 +8,46 @@
 #include <time.h>
 #include <fstream>
 
-#define TIME_UNITS_BASE 42
-#define HEALTH_BASE     43
-#define STAMINA_BASE    44
-#define REACTIONS_BASE  45
-#define STRENGTH_BASE   46
-#define ACCURACY_BASE   47
-#define THROWING_BASE   48
-#define MELEE_BASE      49
-#define PSI_STRENGTH    50
-#define PSI_SKILL       51
-#define BRAVERY_BASE    52
-#define TIME_UNITS_ADDL 53
-#define HEALTH_ADDL     54
-#define STAMINA_ADDL    55
-#define REACTIONS_ADDL  56
-#define STRENGTH_ADDL   57
-#define ACCURACY_ADDL   58
-#define THROWING_ADDL   59
-#define MELEE_ADDL      60
-#define BRAVERY_ADDL    61
-#define ARMOR           62
-#define RECENT_PSI_INC  63
-#define IN_PSI_TRAINING 64
-#define PROMOTION_FLAG  65
-#define MALE_OR_FEMALE  66
-#define ETHNICITY       67
+#define RANK                0
+#define ASSIGNED_BASE       2
+#define ASSIGNED_CRAFT      4
+#define CRAFT_BEFORE_WOUND  6
+#define MISSIONS            8
+#define KILLS               10
+#define WOUND_RECOVERY      12
+#define VALUE               14
+#define NAME                16
+#define TRANSFER_DEST       41
+#define TIME_UNITS_BASE     42
+#define HEALTH_BASE         43
+#define STAMINA_BASE        44
+#define REACTIONS_BASE      45
+#define STRENGTH_BASE       46
+#define ACCURACY_BASE       47
+#define THROWING_BASE       48
+#define MELEE_BASE          49
+#define PSI_STRENGTH        50
+#define PSI_SKILL           51
+#define BRAVERY_BASE        52
+#define TIME_UNITS_ADDL     53
+#define HEALTH_ADDL         54
+#define STAMINA_ADDL        55
+#define REACTIONS_ADDL      56
+#define STRENGTH_ADDL       57
+#define ACCURACY_ADDL       58
+#define THROWING_ADDL       59
+#define MELEE_ADDL          60
+#define BRAVERY_ADDL        61
+#define ARMOR               62
+#define RECENT_PSI_INC      63
+#define IN_PSI_TRAINING     64
+#define PROMOTION_FLAG      65
+#define MALE_OR_FEMALE      66
+#define ETHNICITY           67
+
+#define MAX_NAME_LENGTH     25
+#define SOLDIER_DAT_SIZE    17000
+#define BYTES_PER_SOLDIER   68
 
 using namespace std;
 
@@ -45,23 +59,23 @@ void Recon( unsigned char Rank,
 {
   if( Rank != 255 )
   {
-    name[1] = '%';
+    name[2] = '%';
     if( Accuracy > 64 )
     {
       if( Time_Units > 59 )
       {
         if( Reactions > 59 )
         {
-          name[2] = '/';
+          name[3] = '/';
         }
         else
         {
-          name[2] = '\\';
+          name[3] = '\\';
         }
       }
       else
       {
-        name[2] = '^';
+        name[3] = '^';
       }
     }
   }
@@ -157,7 +171,7 @@ void ReadDisk()                  //reads a file
   int j = 0;
   int k = 0;
   unsigned char rank;
-  char name[21] = {'\0'};
+  char name[MAX_NAME_LENGTH] = {'\0'};
   char *ROOK = "    |";
   char *SQUD = " |  |";
   char *SRGT = "    [";
@@ -206,7 +220,7 @@ void ReadDisk()                  //reads a file
 
   system("cls");
 
-  size = 17000;//soldatin.tellg();
+  size = SOLDIER_DAT_SIZE;//soldatin.tellg();
 //  soldatin.seekg( 0, ios::beg );
   bt = new char [size];
 
@@ -217,8 +231,8 @@ void ReadDisk()                  //reads a file
 
   while( i < size )
   {
-    cout << i/68 + 1 << "\t";
-    rank = ((unsigned char)bt[i]);// & 0x00FF;
+    cout << i/BYTES_PER_SOLDIER + 1 << "\t";
+    rank = ((unsigned char)bt[i+RANK]);// & 0x00FF;
     switch( rank )
     {
       case 0:   memcpy( &name[0], &ROOK[0], 5); break;
@@ -262,7 +276,7 @@ void ReadDisk()                  //reads a file
     {
         award_psi_squad(name, bt[i+PSI_STRENGTH]);
     }
-    j = 16;
+    j = NAME;
     if( !isalpha( bt[i+j] ) )
     {
       j = j + 5;
@@ -300,14 +314,14 @@ void ReadDisk()                  //reads a file
         }
       }
     }
-    while( k < 26 )
+    while( k <= MAX_NAME_LENGTH )
     {
       name[k] = '\0';
       k++;
     }
     cout << name << endl;
-    memcpy( &bt[i+16], &name[0], 25);
-    i+=68;
+    memcpy( &bt[i+NAME], &name[0], MAX_NAME_LENGTH);
+    i+=BYTES_PER_SOLDIER;
   }
 
   soldatout.open(filename, ofstream::binary);
