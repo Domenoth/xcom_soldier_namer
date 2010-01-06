@@ -206,11 +206,10 @@ void ReadDisk()                  //reads a file
       case 10: filename = "GAME_10\\soldier.dat"; break;
       default: cout << "INVALID SAVE GAME!"; exit(1);
   }
-//  filename = "soldier.dat";
 
   ifstream soldatin;
   ofstream soldatout;
-  soldatin.open(filename, ifstream::binary ); //| ifstream::ate);
+  soldatin.open(filename, ifstream::binary );
 
   if ( !soldatin.is_open() )
   {
@@ -220,8 +219,7 @@ void ReadDisk()                  //reads a file
 
   system("cls");
 
-  size = SOLDIER_DAT_SIZE;//soldatin.tellg();
-//  soldatin.seekg( 0, ios::beg );
+  size = SOLDIER_DAT_SIZE;
   bt = new char [size];
 
   cout << endl << size << endl;
@@ -232,7 +230,7 @@ void ReadDisk()                  //reads a file
   while( i < size )
   {
     cout << i/BYTES_PER_SOLDIER + 1 << "\t";
-    rank = ((unsigned char)bt[i+RANK]);// & 0x00FF;
+    rank = ((unsigned char)bt[i+RANK]);
     switch( rank )
     {
       case 0:   memcpy( &name[0], &ROOK[0], 5); break;
@@ -244,31 +242,31 @@ void ReadDisk()                  //reads a file
       case 255: memcpy( &name[0], &KIA[0], 5); break;
       default:  memcpy( &name[0], &INV[0], 5); break;
     }
-    unsigned char bravery = 11 - bt[i+BRAVERY_BASE/*52*/] + bt[i+BRAVERY_ADDL/*61*/];
+    unsigned char bravery = 11 - bt[i+BRAVERY_BASE] + bt[i+BRAVERY_ADDL];
     switch( bravery )
     {
       case 1:  Recon(rank,
                      name,
-                     (unsigned short)bt[i+ACCURACY_BASE/*47*/] + (unsigned short)bt[i+ACCURACY_ADDL/*58*/],
-                     (unsigned short)bt[i+TIME_UNITS_BASE/*42*/] + (unsigned short)bt[i+TIME_UNITS_ADDL/*53*/],
-                     (unsigned short)bt[i+REACTIONS_BASE/*45*/] + (unsigned short)bt[i+56] );
+                     (unsigned short)bt[i+ACCURACY_BASE] + (unsigned short)bt[i+ACCURACY_ADDL],
+                     (unsigned short)bt[i+TIME_UNITS_BASE] + (unsigned short)bt[i+TIME_UNITS_ADDL],
+                     (unsigned short)bt[i+REACTIONS_BASE] + (unsigned short)bt[i+REACTIONS_ADDL] );
                break;
       case 2:  Recon(rank,
                      name,
-                     (unsigned short)bt[i+ACCURACY_BASE/*47*/] + (unsigned short)bt[i+ACCURACY_ADDL/*58*/],
-                     (unsigned short)bt[i+TIME_UNITS_BASE/*42*/] + (unsigned short)bt[i+TIME_UNITS_ADDL/*53*/],
-                     (unsigned short)bt[i+REACTIONS_BASE/*45*/] + (unsigned short)bt[i+REACTIONS_ADDL/*56*/] );
+                     (unsigned short)bt[i+ACCURACY_BASE] + (unsigned short)bt[i+ACCURACY_ADDL],
+                     (unsigned short)bt[i+TIME_UNITS_BASE] + (unsigned short)bt[i+TIME_UNITS_ADDL],
+                     (unsigned short)bt[i+REACTIONS_BASE] + (unsigned short)bt[i+REACTIONS_ADDL] );
                break;
       case 3:  Infantry(rank,
                         name,
-                        (unsigned short)bt[i+ACCURACY_BASE/*47*/] + (unsigned short)bt[i+ACCURACY_ADDL/*58*/],
-                        (unsigned short)bt[i+REACTIONS_BASE/*45*/] + (unsigned short)bt[i+REACTIONS_ADDL/*56*/] );
+                        (unsigned short)bt[i+ACCURACY_BASE] + (unsigned short)bt[i+ACCURACY_ADDL],
+                        (unsigned short)bt[i+REACTIONS_BASE] + (unsigned short)bt[i+REACTIONS_ADDL] );
                break;
       default: HeavyWep(rank,
                         name,
-                        (unsigned short)bt[i+STRENGTH_BASE/*46*/],
-                        (unsigned short)bt[i+ACCURACY_BASE/*47*/] + (unsigned short)bt[i+ACCURACY_ADDL/*58*/],
-                        (unsigned short)bt[i+REACTIONS_BASE/*45*/] + (unsigned short)bt[i+REACTIONS_ADDL/*56*/] );
+                        (unsigned short)bt[i+STRENGTH_BASE],
+                        (unsigned short)bt[i+ACCURACY_BASE] + (unsigned short)bt[i+ACCURACY_ADDL],
+                        (unsigned short)bt[i+REACTIONS_BASE] + (unsigned short)bt[i+REACTIONS_ADDL] );
                break;
     }
     unsigned char psi_skill = bt[i+PSI_SKILL];
