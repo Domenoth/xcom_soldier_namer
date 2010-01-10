@@ -313,7 +313,7 @@ void ReadDisk()                  //reads a file
   char *bt = NULL;
   int size = 0;
   int bytes_per_soldier;
-  string soldier_type;
+  char* soldier_type;
   int i = 0;
   int j = 0;
   int k = 0;
@@ -327,19 +327,17 @@ void ReadDisk()                  //reads a file
   char *KIA  = " KIA ";
   char *INV  = " INV ";
 
-  cout << "Enter Saved Game Number (1-10):\n";
+  cout << "Enter Saved Game Number (1-10) or enter 0 to exit:\n";
   cin  >> game_number;
-  while( (game_number < 1) || (game_number > 10) )
-  {
-      cout << "Invalid Selection. Enter 1-10 instead:";
-      cin >> game_number;
+  system("cls");
+
+  if( game_number != 0 ) {
+    cout << "Looking for GAME_" << game_number << endl;
   }
-  cout << "GAME_"
-       << game_number
-       << "Accepted\n";
 
   switch( game_number )
   {
+      case 0:  cout << "DOING NOTHING!\n"; system("PAUSE"); exit(0); break;
       case 1:  filename = "GAME_1\\soldier.dat"; break;
       case 2:  filename = "GAME_2\\soldier.dat"; break;
       case 3:  filename = "GAME_3\\soldier.dat"; break;
@@ -350,24 +348,20 @@ void ReadDisk()                  //reads a file
       case 8:  filename = "GAME_8\\soldier.dat"; break;
       case 9:  filename = "GAME_9\\soldier.dat"; break;
       case 10: filename = "GAME_10\\soldier.dat"; break;
-      default: cout << "INVALID SAVE GAME!"; exit(1);
+      default: cout << "INVALID SAVE GAME!\n"; system("PAUSE"); exit(1);
   }
 
-  ifstream soldatin;
-  ofstream soldatout;
-  soldatin.open(filename, ifstream::binary );
-
-  if ( !soldatin.is_open() )
-  {
-    cerr << "Failure to open disk file:  " << filename;
-    exit(1);
+  FILE *fp = fopen( filename, "rb" );
+  if (fp == NULL) {
+    cout << "Failed to open file " << filename << endl;
+    system("PAUSE");
+    exit(2);
   }
 
-  system("cls");
+  fseek (fp, 0, SEEK_END);
+  size = ftell (fp);
+  fseek (fp, 0, SEEK_SET);
 
-  soldatin.seekg( 0, ios::end );
-  size = soldatin.tellg();
-  soldatin.seekg( 0, ios::beg );
   if ( size == UFO_SOLDIER_DAT_SIZE )
   {
     bytes_per_soldier = UFO_BYTES_PER_SOLDIER;
@@ -375,20 +369,49 @@ void ReadDisk()                  //reads a file
   }
   else
   {
-    bytes_per_soldier = TFTD_BYTES_PER_SOLDIER;
-    soldier_type = "tftd";
+    if ( size == TFTD_SOLDIER_DAT_SIZE )
+    {
+      bytes_per_soldier = TFTD_BYTES_PER_SOLDIER;
+      soldier_type = "tftd";
+    }
+    else
+    {
+      cout << "ERROR! Not 'ufo' OR 'tftd'\n";
+      system("PAUSE");
+      exit(3);
+    }
   }
   bt = new char [size];
 
-  cout << endl << size << endl << soldier_type << endl << bytes_per_soldier << endl;
+  cout << endl << "file type = " << soldier_type << " (" << size << " bytes)";
 
-  soldatin.read( bt, size );
-  soldatin.close();
+  /*
+  if (soldier_type == "ufo" )
+  {
+    cout << "ufo" << endl;
+  }
+  else
+  {
+    if (soldier_type == "tftd" )
+    {
+      cout << "tftd" << endl;
+    }
+    else
+    {
+      cout << "ERROR! Not 'ufo' OR 'tftd'\n";
+      system("PAUSE");
+      exit(3);
+    }
+  }
+  */
+
+  fread( bt, 1, size, fp );
+
+  fclose(fp);
 
   while( i < size )
   {
-    cout << i/bytes_per_soldier + 1 << "\t";
-    char data[bytes_per_soldier];
+    char *data = new char [bytes_per_soldier];
     memcpy( &data[0], &bt[i], bytes_per_soldier );
     UfoDefenseSoldier ufo_soldier;
     TerrorFromTheDeepSoldier tftd_soldier;
@@ -467,23 +490,23 @@ void ReadDisk()                  //reads a file
       name[k] = '\0';
       k++;
     }
-    cout << name << endl;
+
     memcpy( &bt[i+soldier->name], &name[0], soldier->max_name_length );
     i+=bytes_per_soldier;
   }
 
-  soldatout.open(filename, ofstream::binary);
-
-  if ( !soldatout.is_open() )
-  {
-    cerr << "Failure to open disk file:  " << filename;
-    exit(1);
+  fp = fopen(filename, "wb");
+  if(fp == NULL) {
+    cout << "failed to open " << filename << endl;
+    system("PAUSE");
+    exit(2);
   }
 
-  soldatout.write( bt, size );
-  soldatout.close();
+  fwrite( bt, 1, size, fp );
 
-  cout << endl;
+  fclose(fp);
+
+  cout << endl << "Soldiers named successfully\n\n";
   system("PAUSE");
 }
 int main(void)
